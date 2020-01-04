@@ -7,6 +7,8 @@ from email.header import Header
 from email.mime.text import MIMEText
 import time
 import sys
+import getpass
+import getopt
 
 def get_list():
     limit = 1
@@ -208,11 +210,14 @@ def compare(history, now, user_info, keywords):
         #send email
         if keywords == []:
             send_email(result, user_info)
-        for word in keywords:
-            if word in result:
-                send_email(result, user_info)
+        else:
+            for word in keywords:
+                if word in result:
+                    send_email(result, user_info)
 
 def send_email(article, user_info):
+    if(user_info == {}):
+        print(article)
     title = "New Academic Report"
     host = 'mail.ustc.edu.cn'
     user = user_info["user"]
@@ -235,13 +240,14 @@ def send_email(article, user_info):
 
 if __name__ == "__main__":
     user_info = {}
-    user_info["receiver"] = sys.argv[2]
-    if(len(sys.argv) >= 4):
-        keywords = sys.argv[3:]
-    else:
-        keywords = []
-    user_info["user"] = input("your ustc email:")
-    user_info["passwd"] = input("your passwd:")
+    
+    optlist, keywords = getopt.getopt(sys.argv[1:],'',['email-to='])
+    for opt_name,opt_value in optlist:
+        if(opt_name == "--email-to"):
+            user_info["receiver"] = opt_value
+            user_info["user"] = input("input your ustc email:")
+            user_info["passwd"] = getpass.getpass('input password:')
+
     while True:
         check(user_info, keywords)
         time.sleep(30)
